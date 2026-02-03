@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kiosk Refresher</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background: #000; font-family: sans-serif; }
+        iframe { border: none; width: 100vw; height: 100vh; display: block; }
+        
+        #timer-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            color: #0f0; /* Retro green */
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            pointer-events: none; /* Won't block clicks on the iframe */
+            z-index: 9999;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="timer-overlay">Initializing...</div>
+    <iframe id="kioskFrame" src="about:blank"></iframe>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const targetUrl = params.get('url');
+        const intervalSeconds = parseInt(params.get('s')) || 60;
+        const frame = document.getElementById('kioskFrame');
+        const overlay = document.getElementById('timer-overlay');
+
+        if (targetUrl) {
+            frame.src = targetUrl;
+            let timeLeft = intervalSeconds;
+
+            // Update countdown every second
+            setInterval(() => {
+                timeLeft--;
+                overlay.innerText = `Refresh in: ${timeLeft}s`;
+
+                if (timeLeft <= 0) {
+                    frame.src = targetUrl; // Reload the iframe
+                    timeLeft = intervalSeconds; // Reset timer
+                }
+            }, 1000);
+        } else {
+            overlay.style.display = 'none';
+            document.body.innerHTML = '<div style="color:#ff4444; padding:20px;"><h2>Error: No URL provided.</h2><p>Append <b>?url=https://example.com&s=30</b> to the address bar.</p></div>';
+        }
+    </script>
+</body>
+</html>
